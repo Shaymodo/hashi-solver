@@ -11,13 +11,13 @@ class PuzzleDigit:                              # Class for each puzzle number t
         return self.remaining_num == 0
 
     def number(self):                           # Returns the int value of the full_num
-        return self.full_num
+        if self.full_num == type(int):          # Return ints
+            return self.full_num
+        return self.full_num                    # Return lines
 
-    def add_horizontal(self):
-        pass
+    def remaining_num_decrement(self, dec_val):      # Decreases the remaining amount of lines that can be drawn
+        self.remaining_num -= dec_val
 
-    def add_vertical(self):
-        pass
 
 
 def main():
@@ -58,9 +58,14 @@ def main():
             else:
                 print("Current puzzle is not valid")
 
-        elif choice == 4:                   # Solve current puzzle
+        elif choice == 4:                   # Solve current puzzle and display it
             if layout != []:
-                solver(layout, num_total)
+                solved_layout = solver(layout, num_total)
+                for i in range(height):
+                    print("[", end=" ")
+                    for j in range(width):
+                        print (f"{solved_layout[i][j].number()}", end=" ")
+                    print("]")
             else:                           # If layout is empty, puzzle does not exist
                 print("No current puzzle")
 
@@ -73,8 +78,8 @@ def main():
         print()
 
 
-def manual_layout_input(width, height):     # Iterates through the 2D array and asks for user input for each value
-    layout = []                             # Creates empty row and column arrays
+def manual_layout_input(width, height):         # Iterates through the 2D array and asks for user input for each value
+    layout = []                                 # Creates empty row and column arrays
     num_total = 0
     for i in range (height):
         layout_inner = []
@@ -110,61 +115,75 @@ def solver(layout, num_total):                      # Calls solver helper functi
         finished_nums = 0
         for i in range(len(layout)):
             for j in range(len(layout[i])):
-                if (layout[i][j].done()):                  # Checks object to see if all lines are drawn
+                current = (i,j)
+                if (layout[i][j].done()):           # Checks object to see if all lines are drawn
                     finished_nums += 1
                 else:
-                    print(layout[i][j].done())     #TEMP
+                    print(layout[i][j].done())      #TEMP prints nothing for 0's, prints false for each int in array
                     num = layout[i][j].number()
+                    if num == "-" or num == "=" or num == "|" or num == "dubvert":
+                        break
                     if num == 1:
-                        lined_layout = solver_one(lined_layout)
+                        lined_layout = solver_one(lined_layout, current)
                     elif num == 2:
-                        lined_layout = solver_two(lined_layout)
+                        lined_layout = solver_two(lined_layout, current)
                     elif num == 3:
-                        lined_layout = solver_three(lined_layout)
+                        lined_layout = solver_three(lined_layout, current)
                     elif num == 4:
-                        lined_layout = solver_four(lined_layout)
+                        lined_layout = solver_four(lined_layout, current)
                     elif num == 5:
-                        lined_layout = solver_five(lined_layout)
+                        lined_layout = solver_five(lined_layout, current)
                     elif num == 6:
-                        lined_layout = solver_six(lined_layout)
+                        lined_layout = solver_six(lined_layout, current)
                     elif num == 7:
-                        lined_layout = solver_seven(lined_layout)
+                        lined_layout = solver_seven(lined_layout, current)
                     elif num == 8:
-                        lined_layout = solver_eight(lined_layout)
+                        lined_layout = solver_eight(lined_layout, current)
 
         if finished_nums == num_total:
             solved = True                               # Ends the loop
 
         solved = True                           # TEMPORARY TO PREVENT INFINITE LOOPING
+    return lined_layout
+
+def solver_one(layout, current):                # Solves if remaining_num is 1
+    i,j = current
+    if check_neighbor_amount() == 1:
+        connect(current, )
+
+def solver_two(layout, current):                # Solves if remaining_num is 2
+    pass
+
+def solver_three(layout, current):              # Solves if remaining_num is 3
+    pass
+
+def solver_four(layout, current):               # Solves if remaining_num is 4
+    pass
+
+def solver_five(layout, current):               # Solves if remaining_num is 5
+    pass
+
+def solver_six(layout, current):                # Solves if remaining_num is 6
+    pass
+
+def solver_seven(layout, current):              # Makes single lines for all directions, checks further
+    pass
+
+def solver_eight(layout, current):              # Makes double lines for all directions
+    pass
+
+def check_neighbor_nums(layout, current):                   # Returns 1-8 based on how many neighbors have lines available
+    pass
+
+def check_neighbor_amount(layout, current):                 # Returns 1-4 based on available neighbors
+    pass
+
+def connect(layout, current, target, amount):               # Connects current location and target location with either 1 or 2 lines
+    
+    # code to swap each 0 in between with lines
+    # MAKE SURE TO TEST IF THERE IS ALREADY A SINGLE LINE THAT BECOMES DOUBLE
+
     return
-
-def solver_one(layout):
-    pass
-
-def solver_two(layout):
-    pass
-
-def solver_three(layout):
-    pass
-
-def solver_four(layout):
-    pass
-
-def solver_five(layout):
-    pass
-
-def solver_six(layout):
-    pass
-
-def solver_seven(layout):
-    pass
-
-def solver_eight(layout):
-    pass
-
-def check_neighbor(layout):
-    pass
-
 
 if __name__ == "__main__":
     main()
