@@ -51,16 +51,16 @@ class PuzzleDigit:                              # Class for each puzzle number t
         return ("double")
 
     def set_one_vert_line(self):                # Sets number value to |
-        pass
+        self.full_num = "|"
 
     def set_two_vert_line(self):                # Sets number value to d
-        pass
+        self.full_num = "d"
 
     def set_one_hori_line(self):                # Sets number value to -
-        pass
+        self.full_num = "-"
 
     def set_one_hori_line(self):                # Sets number value to =
-        pass
+        self.full_num = "="
 
     def get_remaining_num(self):                # Returns the remaining number
         return self.remaining_num
@@ -68,11 +68,11 @@ class PuzzleDigit:                              # Class for each puzzle number t
     def remaining_num_decrement(self, dec_val):      # Decreases the remaining amount of lines that can be drawn
         self.remaining_num -= dec_val
 
-    def set_neighbors(self, neighbors):
+    def set_neighbors(self, neighbors):             # Sets neighbors variable to the list passed in
         self.neighbors = neighbors
 
     def get_neighbors(self):
-        return self.neighbors
+        return self.neighbors                   # Returns neighbors list
 
 
 def main():
@@ -175,25 +175,25 @@ def solver(layout, num_total):                      # Calls solver helper functi
                 else:
                     print(layout[i][j].done())      #TEMP prints nothing for 0's, prints false for each int in array
                     num = layout[i][j].get_full_num()
-                    location = layout[i][j].get_location()
+                    current = layout[i][j].get_location()
                     if num == "-" or num == "=" or num == "|" or num == "dubvert":
                         break
                     if num == 1:
-                        layout = solver_one(layout, location)
+                        layout = solver_one(layout, current)
                     elif num == 2:
-                        layout = solver_two(layout, location)
+                        layout = solver_two(layout, current)
                     elif num == 3:
-                        layout = solver_three(layout, location)
+                        layout = solver_three(layout, current)
                     elif num == 4:
-                        layout = solver_four(layout, location)
+                        layout = solver_four(layout, current)
                     elif num == 5:
-                        layout = solver_five(layout, location)
+                        layout = solver_five(layout, current)
                     elif num == 6:
-                        layout = solver_six(layout, location)
+                        layout = solver_six(layout, current)
                     elif num == 7:
-                        layout = solver_seven(layout, location)
+                        layout = solver_seven(layout, current)
                     elif num == 8:
-                        layout = solver_eight(layout, location)
+                        layout = solver_eight(layout, current)
 
         if finished_nums == num_total:
             solved = True                               # Ends the loop
@@ -202,7 +202,19 @@ def solver(layout, num_total):                      # Calls solver helper functi
     return layout
 
 def solver_one(layout, location, neighbors = 0):            # Solves if remaining_num is 1
-    i,j = location
+    if neighbors == 0:
+        neighbors = modify_neighbors(layout, location)
+
+
+    neighbor_count = 4 - neighbors.count("none")
+
+    if neighbor_count == 1:                 # If there is only one neighbor, connect it
+        target = neighbors[0]
+        counter = 1
+        while target == "none":
+            target = neighbors[counter]
+            counter += 1
+        connect(layout, location, target, 1)
 
 def solver_two(layout, location, neighbors = 0):            # Solves if remaining_num is 2
     pass
@@ -225,6 +237,7 @@ def solver_seven(layout, location, neighbors = 0):          # Makes single lines
 def solver_eight(layout, location, neighbors = 0):          # Makes double lines for all directions
     pass
 
+
 def assign_edges(layout):                       # Iterates through layout and 
     for i in range(len(layout)):
         for j in range(len(layout[0])):
@@ -233,7 +246,7 @@ def assign_edges(layout):                       # Iterates through layout and
             if j == 0 or j == 1: layout[i][j].set_left_edge()  
             elif j == len(layout[0]) or j == (len(layout[0])-1): layout[i][j].set_right_edge()
 
-def check_neighbors(layout, current):           # Gives a list of neighbors with their remaining numbers and locations to the class object
+def modify_neighbors(layout, current):           # Gives a list of neighbors with their remaining numbers and locations to the class object
     neighbors = []
     neighbors.append(check_top(layout, current))
     neighbors.append(check_bot(layout, current))
@@ -318,9 +331,41 @@ def check_right(layout, current):         # Checks right neighbors
         return ("none")         # Returns none if no neighbors were found
 
 def connect(layout, current, target, amount):               # Connects current location and target location with either 1 or 2 lines
-    
-    # code to swap each 0 in between with lines
-    # MAKE SURE TO TEST IF THERE IS ALREADY A SINGLE LINE THAT BECOMES A DOUBLE LINE
+    i,j = current
+    x,y = target
+
+    if i == x:                              # If the rows are the same, draws a horizontal line
+        if j > y:
+            big = j
+            small = y
+        else:
+            big = y
+            small = j
+
+        if amount == 1:                     # Single line
+            for k in range(big-small):
+                layout[i][k+small+1].set_one_hori_line()
+        else:                               # Double line
+            for k in range(big-small):
+                layout[i][k+small+1].set_two_hori_line()
+
+    elif j == y:                            # If the columns are the same, draws a vertical line
+        if i > x:
+            big = i
+            small = x
+        else:
+            big = x
+            small = i
+            
+        if amount == 1:                     # Single line
+            for k in range(big-small):
+                layout[k+small+1][j].set_one_vert_line()
+        else:                               # Double line
+            for k in range(big-small):
+                layout[k+small+1][j].set_two_vert_line()
+
+    else:                                   # Error message if rows or columns are not the same
+        print("The rows or columns do not line up")
 
     return
 
