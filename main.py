@@ -52,15 +52,19 @@ class PuzzleDigit:                              # Class for each puzzle number t
 
     def set_one_vert_line(self):                # Sets number value to |
         self.full_num = "|"
+        self.remaining_num = "|"
 
     def set_two_vert_line(self):                # Sets number value to d
         self.full_num = "d"
+        self.remaining_num = "d"
 
     def set_one_hori_line(self):                # Sets number value to -
         self.full_num = "-"
+        self.remaining_num = "-"
 
     def set_one_hori_line(self):                # Sets number value to =
         self.full_num = "="
+        self.remaining_num = "="
 
     def get_remaining_num(self):                # Returns the remaining number
         return self.remaining_num
@@ -174,7 +178,7 @@ def solver(layout, num_total):                      # Calls solver helper functi
                     finished_nums += 1
                 else:
                     print(layout[i][j].done())      #TEMP prints nothing for 0's, prints false for each int in array
-                    num = layout[i][j].get_full_num()
+                    num = layout[i][j].get_remaining_num()
                     current = layout[i][j].get_location()
                     if num == "-" or num == "=" or num == "|" or num == "dubvert":
                         break
@@ -205,10 +209,9 @@ def solver_one(layout, location, neighbors = 0):            # Solves if remainin
     if neighbors == 0:
         neighbors = modify_neighbors(layout, location)
 
-
     neighbor_count = 4 - neighbors.count("none")
 
-    if neighbor_count == 1:                 # If there is only one neighbor, connect it
+    if neighbor_count == 1:                 # If there is only one neighbor, connect it with single line
         target = neighbors[0]
         counter = 1
         while target == "none":
@@ -217,7 +220,66 @@ def solver_one(layout, location, neighbors = 0):            # Solves if remainin
         connect(layout, location, target, 1)
 
 def solver_two(layout, location, neighbors = 0):            # Solves if remaining_num is 2
-    pass
+    if neighbors == 0:
+        neighbors = modify_neighbors(layout, location)
+
+    neighbor_top = (neighbors[0], neighbors[1])
+    neighbor_bot = (neighbors[2], neighbors[3])
+    neighbor_left = (neighbors[4], neighbors[5])
+    neighbor_right = (neighbors[6], neighbors[7])
+
+    neighbor_count = 4 - neighbors.count("none")
+    total_remaining = neighbors[0] + neighbors[2] + neighbors[4] + neighbors[6]
+    neighbor_nums = [neighbors[0], neighbors[2], neighbors[4], neighbors[6]]
+    neighbor_locations = [neighbors[1], neighbors[3], neighbors[5], neighbors[7]]
+
+    if neighbor_count < 4:
+
+        if total_remaining == 2:                # If there are only two available numbers nearby, connect all lines possible
+            if neighbor_count == 1:                 # 1 neighbor
+                target = "none"
+                counter = 0
+                while target == "none":
+                    target = neighbors[counter]
+                    counter += 1
+                connect(layout, location, target, 2)
+
+            if neighbor_count == 2:                 # 2 neighbors
+                target = "none"
+                counter = 0
+                while neighbor_count > 0:
+                    while target == "none":
+                        target = neighbor_locations[counter]
+                        counter += 1
+                    connect(layout, location, target, 1)
+                    neighbor_count -= 1
+
+        elif neighbor_count == 2:               # 2 neighbors with varying numbers
+            if neighbor_nums.count(1) == 1:         # 1 and any other number, connect one line to other number
+                if neighbor_top[0] in (2,3,4,5,6,7,8): x = neighbor_top[1]
+                elif neighbor_bot[0] in (2,3,4,5,6,7,8): x = neighbor_bot[1]
+                elif neighbor_left[0] in (2,3,4,5,6,7,8): x = neighbor_left[1]
+                elif neighbor_right[0] in (2,3,4,5,6,7,8): x = neighbor_right[1]
+                connect(layout, location, x, 1)
+
+            elif neighbor_nums.count(2) == 2:       # 2 and 2, connect one line to each
+                target = "none"
+                counter = 0
+                while neighbor_count > 0:
+                    while target == "none":
+                        target = neighbor_locations[counter]
+                        counter += 1
+                    connect(layout, location, target, 1)
+                    neighbor_count -= 1
+
+            elif neighbor_nums.count(2) == 1:       # 2 and any number 3 or higher, connect one line to other number
+                if neighbor_top[0] in (3,4,5,6,7,8): x = neighbor_top[1]
+                elif neighbor_bot[0] in (3,4,5,6,7,8): x = neighbor_bot[1]
+                elif neighbor_left[0] in (3,4,5,6,7,8): x = neighbor_left[1]
+                elif neighbor_right[0] in (3,4,5,6,7,8): x = neighbor_right[1]
+                connect(layout, location, x, 1)
+
+        # 3 neighbors MAY NOT WORK WITH REMAINING NUMS, ADJUST FOR FULL NUM INSTEAD
 
 def solver_three(layout, location, neighbors = 0):          # Solves if remaining_num is 3
     pass
@@ -248,10 +310,19 @@ def assign_edges(layout):                       # Iterates through layout and
 
 def modify_neighbors(layout, current):           # Gives a list of neighbors with their remaining numbers and locations to the class object
     neighbors = []
-    neighbors.append(check_top(layout, current))
-    neighbors.append(check_bot(layout, current))
-    neighbors.append(check_left(layout, current))
-    neighbors.append(check_right(layout, current))
+    l, k = 0
+    l, k = check_top(layout, current)
+    neighbors.append(l)
+    neighbors.append(k)
+    l, k = check_bot(layout, current)
+    neighbors.append(l)
+    neighbors.append(k)
+    l, k = check_left(layout, current)
+    neighbors.append(l)
+    neighbors.append(k)
+    l, k = check_right(layout, current)
+    neighbors.append(l)
+    neighbors.append(k)
     i, j = current
     layout[i][j].set_neighbors(neighbors)
     return
@@ -272,7 +343,7 @@ def check_top(layout, current):         # Checks top neighbors
                     break 
                 else:
                     return (layout[temp][j].get_remaining_num(), layout[temp][j].get_location())    # Adds remaining num and location of neighbor above current location to neighbors list
-        return ("none")         # Returns none if no neighbors were found
+        return (0,"none")         # Returns none if no neighbors were found
 
 def check_bot(layout, current):         # Checks bottom neighbors
     i,j = current
@@ -291,7 +362,7 @@ def check_bot(layout, current):         # Checks bottom neighbors
                     break 
                 else:
                     return (layout[temp][j].get_remaining_num(), layout[temp][j].get_location())    # Adds remaining num and location of neighbor above current location to neighbors list
-        return ("none")         # Returns none if no neighbors were found
+        return (0,"none")         # Returns none if no neighbors were found
 
 def check_left(layout, current):        # Checks left neighbors
     i,j = current
@@ -309,7 +380,7 @@ def check_left(layout, current):        # Checks left neighbors
                     break 
                 else:
                     return (layout[i][temp].get_remaining_num(), layout[i][temp].get_location())    # Adds remaining num and location of neighbor left of current location to neighbors list
-        return ("none")         # Returns none if no neighbors were found
+        return (0,"none")         # Returns none if no neighbors were found
 
 def check_right(layout, current):         # Checks right neighbors
     i,j = current
@@ -328,7 +399,7 @@ def check_right(layout, current):         # Checks right neighbors
                     break 
                 else:
                     return (layout[i][temp].get_remaining_num(), layout[i][temp].get_location())    # Adds remaining num and location of neighbor above current location to neighbors list
-        return ("none")         # Returns none if no neighbors were found
+        return (0,"none")         # Returns none if no neighbors were found
 
 def connect(layout, current, target, amount):               # Connects current location and target location with either 1 or 2 lines
     i,j = current
@@ -366,6 +437,8 @@ def connect(layout, current, target, amount):               # Connects current l
 
     else:                                   # Error message if rows or columns are not the same
         print("The rows or columns do not line up")
+    
+    # ADD DECREMENTATION SOMEWHERE IN THIS FUNCTION
 
     return
 
