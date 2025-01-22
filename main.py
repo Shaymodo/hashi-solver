@@ -300,7 +300,7 @@ def solver_eight(layout, location, neighbors = 0):          # Makes double lines
     pass
 
 
-def assign_edges(layout):                       # Iterates through layout and 
+def assign_edges(layout):                       # Iterates through layout and sets edges
     for i in range(len(layout)):
         for j in range(len(layout[0])):
             if i == 0 or i == 1: layout[i][j].set_top_edge()
@@ -416,9 +416,13 @@ def connect(layout, current, target, amount):               # Connects current l
         if amount == 1:                     # Single line
             for k in range(big-small):
                 layout[i][k+small+1].set_one_hori_line()
+            layout[i][j].remaining_num_decrement(1)
+            layout[x][y].remaining_num_decrement(1)
         else:                               # Double line
             for k in range(big-small):
                 layout[i][k+small+1].set_two_hori_line()
+            layout[i][j].remaining_num_decrement(2)
+            layout[x][y].remaining_num_decrement(2)
 
     elif j == y:                            # If the columns are the same, draws a vertical line
         if i > x:
@@ -431,14 +435,16 @@ def connect(layout, current, target, amount):               # Connects current l
         if amount == 1:                     # Single line
             for k in range(big-small):
                 layout[k+small+1][j].set_one_vert_line()
+            layout[i][j].remaining_num_decrement(1)
+            layout[x][y].remaining_num_decrement(1)
         else:                               # Double line
             for k in range(big-small):
                 layout[k+small+1][j].set_two_vert_line()
+            layout[i][j].remaining_num_decrement(2)
+            layout[x][y].remaining_num_decrement(2)
 
     else:                                   # Error message if rows or columns are not the same
         print("The rows or columns do not line up")
-    
-    # ADD DECREMENTATION SOMEWHERE IN THIS FUNCTION
 
     return
 
