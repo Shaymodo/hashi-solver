@@ -62,7 +62,7 @@ class PuzzleDigit:                              # Class for each puzzle number t
         self.full_num = "-"
         self.remaining_num = "-"
 
-    def set_one_hori_line(self):                # Sets number value to =
+    def set_two_hori_line(self):                # Sets number value to =
         self.full_num = "="
         self.remaining_num = "="
 
