@@ -8,10 +8,10 @@ class PuzzleDigit:                              # Class for each puzzle number t
         self.location = location                # Store where the number is in the layout
         self.remaining_num = num                # Initialize the number counting down for each line drawn
         self.neighbors = []
-        self.top_edge
-        self.bot_edge
-        self.left_edge
-        self.right_edge
+        self.top_edge = False
+        self.bot_edge = False
+        self.left_edge = False
+        self.right_edge = False
 
     def done(self):                             # Returns True if all the lines drawn for this number
         return self.remaining_num == 0
@@ -44,11 +44,11 @@ class PuzzleDigit:                              # Class for each puzzle number t
         return self.right_edge
 
     def get_full_num(self):                           # Returns the value of the full_num
-        if self.full_num == type(int):                      # Return ints
-            return self.full_num
-        elif self.full_num == "-" or self.full_num == "|":            # Return single or double for lines
+        if self.full_num == "-" or self.full_num == "|":            # Return single for lines
             return ("single")
-        return ("double")
+        elif self.full_num == "=" or self.full_num == "d":          # Return single or double for lines
+            return ("double")
+        return self.full_num
 
     def set_one_vert_line(self):                # Sets number value to |
         self.full_num = "|"
@@ -281,24 +281,62 @@ def solver_two(layout, location, neighbors = 0):            # Solves if remainin
 
         # 3 neighbors MAY NOT WORK WITH REMAINING NUMS, ADJUST FOR FULL NUM INSTEAD
 
-def solver_three(layout, location, neighbors = 0):          # Solves if remaining_num is 3
-    pass
+def solver_three(layout, location, neighbors = 0):          # Solver if remaining_num is 3
+    if neighbors == 0:
+        neighbors = modify_neighbors(layout, location)
 
-def solver_four(layout, location, neighbors = 0):           # Solves if remaining_num is 4
-    pass
+    neighbor_top = (neighbors[0], neighbors[1])
+    neighbor_bot = (neighbors[2], neighbors[3])
+    neighbor_left = (neighbors[4], neighbors[5])
+    neighbor_right = (neighbors[6], neighbors[7])
 
-def solver_five(layout, location, neighbors = 0):           # Solves if remaining_num is 5
-    pass
+    neighbor_count = 4 - neighbors.count("none")
+    total_remaining = neighbors[0] + neighbors[2] + neighbors[4] + neighbors[6]
+    neighbor_nums = [neighbors[0], neighbors[2], neighbors[4], neighbors[6]]
+    neighbor_locations = [neighbors[1], neighbors[3], neighbors[5], neighbors[7]]
 
-def solver_six(layout, location, neighbors = 0):            # Solves if remaining_num is 6
-    pass
+    if neighbor_count < 4:
+        pass
 
-def solver_seven(layout, location, neighbors = 0):          # Makes single lines for all directions, checks further
-    pass
+    # 2 neighbors  -  draw single line to each neighbor, then call solver_one
+
+    # 3 neighbors   -   1, 1, any  -   1, 2, any
+
+
+def solver_four(layout, location, neighbors = 0):           # Solver if remaining_num is 4
+    if neighbors == 0:
+        neighbors = modify_neighbors(layout, location)
+
+def solver_five(layout, location, neighbors = 0):           # Solver if remaining_num is 5
+    if neighbors == 0:
+        neighbors = modify_neighbors(layout, location)
+
+    # 3 neighbors  -  single line for each neighbor, then call solver_two
+    # 4 neighbors  -  1, 1, any, any draw two single lines call solver_three  -  1, 2, 2, any draw single line to any call solver_four
+
+def solver_six(layout, location, neighbors = 0):            # Solver if remaining_num is 6
+    neighbors = modify_neighbors(layout, location)
+
+    # 3 neighbors  -  double line for each neighbor
+    # 4 neighbors  -  1, any, any, any draw single line to 1 call solver_five  -  2, 2, 2, any draw single line to any call solver_five
+
+def solver_seven(layout, location, neighbors = 0):          # Makes single lines for all directions, then calls solver_three
+    neighbors = modify_neighbors(layout, location)
+
+    connect(layout, location, neighbors[1], 1)
+    connect(layout, location, neighbors[3], 1)
+    connect(layout, location, neighbors[5], 1)
+    connect(layout, location, neighbors[7], 1)
+
+    solver_three(layout, location, neighbors)
 
 def solver_eight(layout, location, neighbors = 0):          # Makes double lines for all directions
-    pass
+    neighbors = modify_neighbors(layout, location)
 
+    connect(layout, location, neighbors[1], 2)
+    connect(layout, location, neighbors[3], 2)
+    connect(layout, location, neighbors[5], 2)
+    connect(layout, location, neighbors[7], 2)
 
 def assign_edges(layout):                       # Iterates through layout and sets edges
     for i in range(len(layout)):
@@ -310,7 +348,7 @@ def assign_edges(layout):                       # Iterates through layout and se
 
 def modify_neighbors(layout, current):           # Gives a list of neighbors with their remaining numbers and locations to the class object
     neighbors = []
-    l, k = 0
+    l, k = 0                        # cannot unpack non-iterable int object -------------------------------------------------------------------------------------------------------
     l, k = check_top(layout, current)
     neighbors.append(l)
     neighbors.append(k)
